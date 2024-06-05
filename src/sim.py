@@ -27,7 +27,7 @@ class Simulation:
 
         while not self._done:
 
-            display.get_surface().fill("white")
+            display.get_surface().fill("black")
             self._delta_time.set()
 
             for pygame_event in event.get():

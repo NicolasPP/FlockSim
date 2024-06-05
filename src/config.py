@@ -1,1 +1,2 @@
 FPS_FONT_SIZE: int = 20
+VECTOR_EPSILON: float = 1e-6
