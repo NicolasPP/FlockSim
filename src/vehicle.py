@@ -1,16 +1,17 @@
 from random import uniform
+from typing import Optional
 
 from pygame.math import Vector2
 from pygame.surface import Surface
 
-from config import MAX_SPEED, MAX_FORCE, PERCEPTION
+from sim_params import SimulationParameters
 
 
 class Vehicle:
 
     @staticmethod
     def random_unit() -> Vector2:
-        return Vector2(uniform(-1, 1), uniform(-1, 1)).normalize() * MAX_SPEED
+        return Vector2(uniform(-1, 1), uniform(-1, 1)).normalize() * SimulationParameters.get().max_speed
 
     def __init__(self, pos: Vector2) -> None:
         self._position: Vector2 = pos
@@ -49,28 +50,32 @@ class Vehicle:
 
     def update(self) -> None:
         self._velocity = self._velocity + self._acceleration
-        if self.velocity.length() > 1e-15:
-            self._velocity.clamp_magnitude_ip(MAX_SPEED)
+        if self.velocity.length() > 1e-10:
+            self._velocity.clamp_magnitude_ip(SimulationParameters.get().max_speed)
 
         self._position = self._position + self._velocity
         self._acceleration = Vector2(0)
 
     def seek(self, target: Vector2, seek_force: float = 0.5) -> None:
         desired_velocity: Vector2 = target - self._position
-        desired_velocity.scale_to_length(MAX_SPEED)
+        desired_velocity.scale_to_length(SimulationParameters.get().max_speed)
         self.apply_force(desired_velocity - self._velocity, seek_force)
 
     def avoid(self, target: Vector2) -> None:
-        if self._position.distance_squared_to(target) > PERCEPTION * PERCEPTION:
+        params: SimulationParameters = SimulationParameters.get()
+        if self._position.distance_squared_to(target) > params.others_perception * params.others_perception:
             return
 
         desired_velocity: Vector2 = (target - self._position) * -1
-        if desired_velocity.length() > 1e-15:
-            desired_velocity.scale_to_length(MAX_SPEED)
+        if desired_velocity.length() > 1e-10:
+            desired_velocity.scale_to_length(params.max_speed)
         self.apply_force(desired_velocity - self._velocity, 0.5)
 
-    def apply_force(self, force: Vector2, max_force: float = MAX_FORCE) -> None:
-        if force.magnitude_squared() > 1e-15:
+    def apply_force(self, force: Vector2, max_force: Optional[float] = None) -> None:
+        if max_force is None:
+            max_force = SimulationParameters.get().max_force
+
+        if force.magnitude_squared() > 1e-10:
             force.clamp_magnitude_ip(max_force)
 
         self._acceleration += force
