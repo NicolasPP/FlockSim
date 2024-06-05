@@ -33,16 +33,17 @@ class SimulationParameters:
     max_speed: float = 7.0
     others_perception: int = 55
     wall_perception: int = 60
-    boid_count: int = 300
+    boid_count: int = 1000
     wall_state: WallState = WallState.AVOID
     avoid_cursor: bool = True
     boid_length: int = 15
     boid_width: int = 4
     seek_force: float = 0.5
     avoid_force: float = 1
-    alignment_force: float = 0.095
-    cohesion_force: float = 0.09
-    separation_force: float = 0.15
+    alignment_force: float = 0.1
+    cohesion_force: float = 0.1
+    separation_force: float = 0.2
+    grid_cell_size: int = 50
 
 
 
