@@ -16,7 +16,7 @@ class FrameRateDisplay:
         return Surface(self._font.size("144"))
 
     def render(self, parent: Surface, fps: float) -> None:
-        self._surface.fill("white")
-        fps_surface: Surface = self._font.render(str(fps), True, "black", "white")
+        self._surface.fill("black")
+        fps_surface: Surface = self._font.render(str(fps), True, "white", "black")
         self._surface.blit(fps_surface, fps_surface.get_rect(center=self._surface.get_rect().center))
         parent.blit(self._surface, (0, 0))
