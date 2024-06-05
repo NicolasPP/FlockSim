@@ -47,7 +47,7 @@ class Boid:
 
     def render(self, parent: Surface) -> None:
         params: SimulationParameters = SimulationParameters.get()
-        draw.line(parent, "blue", self._position, self._position + (self._velocity.normalize() * params.boid_length),
+        draw.line(parent, "red", self._position, self._position + (self._velocity.normalize() * params.boid_length),
                   params.boid_width)
 
     def update(self) -> None:
