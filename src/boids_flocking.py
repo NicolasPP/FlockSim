@@ -15,7 +15,7 @@ class BoidsFlock:
 
     def __init__(self) -> None:
         params: SimulationParameters = SimulationParameters.get()
-        self._grid: SpacialGrid[Boid] = SpacialGrid(params.grid_cell_size)
+        self._grid: SpacialGrid[Boid] = SpacialGrid(params.grid_cell_size, params.screen_width, params.screen_height)
         self._update_rate: Accumulator = Accumulator(SimulationParameters.get().update_rate)
         self._boids: list[Boid] = self._create_boids()
 
@@ -34,7 +34,7 @@ class BoidsFlock:
     def _get_neighbours(self, boid: Boid) -> list[Boid]:
         params: SimulationParameters = SimulationParameters.get()
         neighbours: list[Boid] = []
-        for other in self._grid.get_surrounding(boid.position):
+        for other in self._grid.query(boid.position):
             if other is boid:
                 continue
 
