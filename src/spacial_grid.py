@@ -52,9 +52,7 @@ class SpacialGrid[T]:
             return result
 
         for surrounding_index in self._surrounding_cells.get((index.y, index.x), []):
-
-            index: Vector2 = Vector2(surrounding_index)
-            result.extend(self._grid.get((index.x, index.y), []))
+            result.extend(self._grid.get(surrounding_index, []))
 
         return result
 
