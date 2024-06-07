@@ -38,12 +38,10 @@ class SimulationParameters:
     avoid_cursor: bool = True
     boid_length: int = 15
     boid_width: int = 4
-    seek_force: float = 0.5
-    avoid_force: float = 1
+    avoid_wall_force: float = 0.5
+    avoid_cursor_force: float = 1
     alignment_force: float = 0.1
     cohesion_force: float = 0.1
     separation_force: float = 0.2
-    grid_cell_size: int = 50
-
-
-
+    grid_cell_size: int = 15
+    max_boid_neighbours: int = 100
