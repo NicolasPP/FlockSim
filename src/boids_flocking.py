@@ -20,7 +20,6 @@ class BoidsFlock:
         self._boids: list[Boid] = self._create_boids()
 
     def _create_boids(self) -> list[Boid]:
-        # FIXME: dont need to keep boids list anymore since they all live in the SpacialGrid
         boids: list[Boid] = []
         params: SimulationParameters = SimulationParameters.get()
         for _ in range(params.boid_count):
@@ -31,16 +30,19 @@ class BoidsFlock:
 
         return boids
 
-    def _get_neighbours(self, boid: Boid) -> list[Boid]:
+    def _get_neighbours(self, boid: Boid) -> list[tuple[Boid, float]]:
         params: SimulationParameters = SimulationParameters.get()
-        neighbours: list[Boid] = []
+        neighbours: list[tuple[Boid, float]] = []
         for other in self._grid.query(boid.position):
             if other is boid:
                 continue
 
-            if (0 < other.position.distance_squared_to(boid.position) <
-                    params.others_perception * params.others_perception):
-                neighbours.append(other)
+            if len(neighbours) >= params.max_boid_neighbours:
+                return neighbours
+
+            distance: float = other.position.distance_to(boid.position)
+            if 0 < distance < params.others_perception:
+                neighbours.append((other, distance))
 
         return neighbours
 

@@ -23,7 +23,7 @@ class Boid:
 
     @staticmethod
     def random_unit() -> Vector2:
-        return Vector2(uniform(-1, 1), uniform(-1, 1)).normalize() * SimulationParameters.get().max_speed
+        return Vector2(uniform(-1, 1), uniform(-1, 1)).normalize()
 
     def __init__(self, pos: Vector2) -> None:
         self._position: Vector2 = pos
@@ -55,14 +55,14 @@ class Boid:
         self._position = self._position + self._velocity
         self._acceleration = Vector2(0)
 
-    def seek(self, target: Vector2) -> None:
+    def _seek(self, target: Vector2, strength: float) -> None:
         params: SimulationParameters = SimulationParameters.get()
         desired_velocity: Vector2 = target - self._position
         scale_to_length(desired_velocity, params.max_speed)
         seek: Vector2 = desired_velocity - self._velocity
-        self._apply_force(seek, params.seek_force)
+        self._apply_force(seek, strength)
 
-    def avoid(self, target: Vector2) -> None:
+    def _avoid(self, target: Vector2, strength: float) -> None:
         params: SimulationParameters = SimulationParameters.get()
         if self._position.distance_squared_to(target) > params.others_perception * params.others_perception:
             return
@@ -70,7 +70,7 @@ class Boid:
         desired_velocity: Vector2 = (target - self._position) * -1
         scale_to_length(desired_velocity, params.max_speed)
         avoid: Vector2 = desired_velocity - self._velocity
-        self._apply_force(avoid, params.avoid_force)
+        self._apply_force(avoid, strength)
 
     def wrap_wall(self) -> None:
         params: SimulationParameters = SimulationParameters.get()
@@ -98,26 +98,27 @@ class Boid:
                 self._position.x < params.wall_perception,
                 self._position.y > params.screen_height - params.wall_perception,
                 self._position.y < params.wall_perception]):
-            self.seek(Vector2(params.screen_width, params.screen_height) // 2)
+            self._seek(Vector2(params.screen_width, params.screen_height) // 2, params.avoid_wall_force)
 
     def avoid_cursor(self) -> None:
-        if not SimulationParameters.get().avoid_cursor:
+        params: SimulationParameters = SimulationParameters.get()
+        if not params.avoid_cursor:
             return
 
-        self.avoid(Vector2(mouse.get_pos()))
+        self._avoid(Vector2(mouse.get_pos()), params.avoid_cursor_force)
 
-    def flock(self, neighbours: list[Boid]) -> None:
+    def flock(self, neighbours: list[tuple[Boid, float]]) -> None:
         params: SimulationParameters = SimulationParameters.get()
         neighbours_size: int = len(neighbours)
 
         if neighbours_size == 0:
             return
 
-        cohesion = separation = alignment = Vector2(0)
-        for neighbour in neighbours:
-            cohesion = cohesion + neighbour._position
-            separation += (self._position - neighbour._position) / neighbour._position.distance_to(self._position)
+        alignment = cohesion = separation = Vector2(0)
+        for neighbour, distance in neighbours:
             alignment = alignment + neighbour._velocity
+            cohesion = cohesion + neighbour._position
+            separation = separation + (self._position - neighbour._position) / distance
 
         # Alignment
         alignment = alignment / neighbours_size
